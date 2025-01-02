@@ -1,0 +1,45 @@
+name: Sync external repository directly to this repository
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # Vérifie toutes les 6 heures
+  workflow_dispatch: # Permet de lancer manuellement le workflow
+
+permissions:
+  contents: write       # Nécessaire pour écrire dans ton dépôt
+  
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Cloner ton dépôt
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+        with:
+          ref: main # Branche principale de ton dépôt
+
+      # Étape 2 : Configurer l'identité Git
+      - name: Configure Git Identity
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      # Étape 3 : Ajouter le dépôt source comme remote
+      - name: Add external repository as remote
+        run: |
+          git remote add upstream https://codeberg.org/proxigram/proxigram.git || echo "Remote already exists"
+          git fetch upstream
+
+      # Étape 4 : Fusionner les changements du dépôt source
+      - name: Merge changes from external repository
+        run: |
+          git merge upstream/main --allow-unrelated-histories -m "Merge updates from external repository"
+          git push origin main
+
+      # Étape 5 : Debug - Vérifier les fichiers après synchronisation
+      - name: List updated files
+        run: |
+          echo "Liste des fichiers après synchronisation :"
+          ls -la

@@ -1,0 +1,56 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */6 * * *" # Exécute toutes les 6 heures
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: proxigram/proxigram
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # Étape 1 : Checkout du code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Étape 2 : Connexion à GitHub Container Registry
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      # Étape 3 : Extraction des métadonnées avec ajout de `latest`
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest          # Ajoute explicitement `latest`
+            type=ref,event=branch          # Ajoute un tag basé sur le nom de la branche
+            type=sha                       # Ajoute un tag basé sur le SHA du commit
+
+      # Étape 4 : Construire et pousser l'image Docker
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .                               # Contexte de build (le répertoire courant)
+          push: true                               # Pousser l'image après le build
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

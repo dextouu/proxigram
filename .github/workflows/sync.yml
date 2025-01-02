@@ -1,8 +1,8 @@
 name: Sync external repository directly to this repository
 
 on:
-  schedule:
-    - cron: "0 */6 * * *" # Vérifie toutes les 6 heures
+#  schedule:
+ #   - cron: "0 */6 * * *" # Vérifie toutes les 6 heures
   workflow_dispatch: # Permet de lancer manuellement le workflow
 
 permissions:

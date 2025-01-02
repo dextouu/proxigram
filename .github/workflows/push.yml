@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "0 */6 * * *" # toutes les 6 heures
+ # schedule:
+ #   - cron: "0 */6 * * *" # toutes les 6 heures
   workflow_dispatch: # Permet de lancer manuellement le workflow
 
 

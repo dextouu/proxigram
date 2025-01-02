@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 */6 * * *" # Exécute toutes les 6 heures
+    - cron: "0 */6 * * *" # toutes les 6 heures
 
 env:
   REGISTRY: ghcr.io
